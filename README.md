@@ -1,6 +1,6 @@
 # Phase-3-Code-Challenge
 
-# 📰 Articles Domain Modeling with SQL (Without SQLAlchemy)
+#  Articles Domain Modeling with SQL (Without SQLAlchemy)
 
 ## Overview
 
@@ -16,30 +16,34 @@ This project models the relationships between **Authors**, **Articles**, and **M
 
 ## 🗂️ Project Structure
 
-code-challenge/
+code challange/
+│
 ├── lib/
 │ ├── db/
-│ │ ├── connection.py # DB connection setup (SQLite)
-│ │ ├── schema.sql # Table definitions
-│ │ └── seed.py # Optional seed data for development
+│ │ ├── connection.py # Database connection
+│ │ ├── schema.sql # SQL schema definitions
+│ │ └── seed.py # Optional seed data
+│ │
 │ ├── models/
-│ │ ├── init.py # Model package initializer
-│ │ ├── author.py # Author model and SQL methods
-│ │ ├── article.py # Article model and SQL methods
-│ │ └── magazine.py # Magazine model and SQL methods
-│ ├── debug.py # Interactive debugging (REPL)
+│ │ ├── init.py # Models module initializer
+│ │ ├── author.py # Author model
+│ │ ├── article.py # Article model
+│ │ └── magazine.py # Magazine model
+│ │
+│ ├── debug.py # Interactive testing console
 │ └── init.py # Lib package initializer
+│
 ├── scripts/
-│ ├── setup_db.py # Creates and initializes database
-│ └── run_queries.py # Optional query test script
+│ ├── setup_db.py # Run schema & initialize DB
+│ └── run_queries.py # Optional query tests
+│
 ├── tests/
-│ ├── test_author.py # Unit tests for Author
-│ ├── test_article.py # Unit tests for Article
-│ └── test_magazine.py # Unit tests for Magazine
-└── README.md # Project documentation
-
-
----
+│ ├── test_author.py # Tests for Author
+│ ├── test_article.py # Tests for Article
+│ └── test_magazine.py # Tests for Magazine
+│
+├── articles.db # SQLite3 database file (auto-generated)
+└── README.md #
 
 ## 🧰 Technologies Used
 
