@@ -1,3 +1,6 @@
+from __init__ import CURSOR, CONN
+from article import Article
+
 class Magazine:
     all = {}
 
@@ -9,59 +12,69 @@ class Magazine:
     def __repr__(self):
         return f"<Magazine {self.id}: {self.name}, {self.category}>"
 
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if isinstance(value, str) and 1 <= len(value) <= 255:
+            self._name = value
+        else:
+            raise ValueError("Magazine name must be a non-empty string under 255 characters.")
+
+    @property
+    def category(self):
+        return self._category
+
+    @category.setter
+    def category(self, value):
+        if isinstance(value, str) and 1 <= len(value) <= 255:
+            self._category = value
+        else:
+            raise ValueError("Category must be a non-empty string under 255 characters.")
+
     @classmethod
     def create_table(cls):
-        sql = """
+        CURSOR.execute("""
             CREATE TABLE IF NOT EXISTS magazines (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 category TEXT NOT NULL
-            )
-        """
-        CURSOR.execute(sql)
-        CONN.commit()
-
-    @classmethod
-    def drop_table(cls):
-        CURSOR.execute("DROP TABLE IF EXISTS magazines")
+            );
+        """)
         CONN.commit()
 
     def save(self):
-        sql = "INSERT INTO magazines (name, category) VALUES (?, ?)"
-        CURSOR.execute(sql, (self.name, self.category))
-        CONN.commit()
-        self.id = CURSOR.lastrowid
-        type(self).all[self.id] = self
-
-    @classmethod
-    def create(cls, name, category):
-        magazine = cls(name, category)
-        magazine.save()
-        return magazine
+        if self.id:
+            self.update()
+        else:
+            CURSOR.execute("INSERT INTO magazines (name, category) VALUES (?, ?)", (self.name, self.category))
+            CONN.commit()
+            self.id = CURSOR.lastrowid
+            type(self).all[self.id] = self
 
     def update(self):
-        sql = "UPDATE magazines SET name = ?, category = ? WHERE id = ?"
-        CURSOR.execute(sql, (self.name, self.category, self.id))
+        CURSOR.execute("UPDATE magazines SET name = ?, category = ? WHERE id = ?", (self.name, self.category, self.id))
         CONN.commit()
 
-    def delete(self):
-        CURSOR.execute("DELETE FROM magazines WHERE id = ?", (self.id,))
-        CONN.commit()
-        if self.id in Magazine.all:
-            del Magazine.all[self.id]
+    @classmethod
+    def find_by_id(cls, id):
+        row = CURSOR.execute("SELECT * FROM magazines WHERE id = ?", (id,)).fetchone()
+        return cls(row[1], row[2], row[0]) if row else None
 
     @classmethod
-    def instance_from_db(cls, row):
-        magazine = cls.all.get(row[0])
-        if magazine:
-            magazine.name = row[1]
-            magazine.category = row[2]
-        else:
-            magazine = cls(row[1], row[2], row[0])
-            cls.all[magazine.id] = magazine
-        return magazine
+    def find_by_name(cls, name):
+        row = CURSOR.execute("SELECT * FROM magazines WHERE name = ?", (name,)).fetchone()
+        return cls(row[1], row[2], row[0]) if row else None
 
     @classmethod
-    def get_all(cls):
-        rows = CURSOR.execute("SELECT * FROM magazines").fetchall()
-        return [cls.instance_from_db(row) for row in rows]
+    def find_by_category(cls, category):
+        rows = CURSOR.execute("SELECT * FROM magazines WHERE category = ?", (category,)).fetchall()
+        return [cls(row[1], row[2], row[0]) for row in rows]
+
+    def articles(self):
+        return Article.find_by_magazine(self.id)
+
+    def contributors(self):
+        return list({article.author() for article in self.articles()})
